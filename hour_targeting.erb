@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hour targeting</title>
+</head>
+<body>
+    <h3>From our data, it shows that the best times of the day to send targeted ads are the following:</h3>
+    <table border="1">
+        <tr>
+            <th> Hour of the day </th>
+            <th> Numbers of people registered </th>
+        </tr>
+        <% hour_targets.each do |hour| %>
+        <tr>
+            <td><%= hour[0] %></td>
+            <td><%= hour[1] %></td>
+        </tr>
+        <% end %>
+    </table>
+</body>
+</html>

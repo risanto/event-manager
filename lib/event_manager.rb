@@ -68,15 +68,63 @@ contents = CSV.open "event_attendees.csv", headers: true, header_converters: :sy
 template_letter = File.read "form_letter.erb"
 erb_template = ERB.new template_letter
 
+datetime_arr = []
+
 contents.each do |row|
     id = row[0]
     name = row[:first_name]
-    
+
+    date_time = DateTime.strptime(row[:regdate], '%Y/%d/%m %H:%M')
+    datetime_arr << date_time
+
     phone = clean_phone_number(row[:homephone])
     zipcode = clean_zipcode(row[:zipcode])
     legislators = legislators_by_zipcode(zipcode)
 
     form_letter = erb_template.result(binding)
 
-    save_thank_you_letter(id, form_letter)
+    # Create a personalised thank you letters for event attendes -> html files stored in output
+
+    # save_thank_you_letter(id, form_letter)
 end
+
+
+def time_targeting(datetime_arr, target_by)
+    result = Hash.new(0)
+
+    datetime_arr.each do |date|
+        if (target_by == 'hour')
+            result["#{date.hour}:00"] += 1
+        elsif (target_by == 'day')
+            days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            result[days[date.wday]] += 1
+        end
+    end
+
+    result.sort_by {|k, v| -v}
+end
+
+
+# Time targeting to see which hours of the day the most people registered
+
+hour_targets = time_targeting(datetime_arr, 'hour')
+
+hour_targeting = File.read "hour_targeting.erb"
+hour_targeting_tab = ERB.new hour_targeting
+
+def save_table(tab, tab_name)
+    Dir.mkdir("output") unless Dir.exists? "output"
+
+    filename = "output/#{tab_name}.html"
+
+    File.open(filename, 'w') do |file|
+        file.puts tab.result
+    end
+end
+
+save_table(hour_targeting_tab, 'hour_targeting')
+
+
+# Time targeting to see which day of the week most people registered
+
+# pp time_targeting(datetime_arr, 'day')
